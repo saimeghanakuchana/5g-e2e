@@ -72,12 +72,8 @@ sdr.component_id = params.sdr_node_id
 sdr.component_manager_id = COMP_MANAGER_ID
 
 sdr_link = request.Link("sdr-link")
-sdr_link.bandwidth = 10*1000*1000
 sdr_link.addInterface(node_sdr_if)
 sdr_link.addNode(sdr)
-
-
-
 
 tour = ig.Tour()
 tour.Description(ig.Tour.MARKDOWN, tour_description)
