@@ -68,7 +68,7 @@ if params.compute_node_id:
 else:
     node.hardware_type = params.compute_node_type
 
-node.disk_image = UBUNTU_IMG
+node.disk_image = params.compute_node_image
 node_sdr_if = node.addInterface("sdr-if")
 node_sdr_if.addAddress(pg.IPv4Address(params.sdr_host_address, "255.255.255.0"))
 node.addService(pg.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
