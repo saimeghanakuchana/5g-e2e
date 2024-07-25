@@ -30,6 +30,13 @@ pc.defineParameter(
 )
 
 pc.defineParameter(
+    name="compute_node_image",
+    description="Disk image to load on the compute node",
+    typ=portal.ParameterType.STRING,
+    defaultValue=UBUNTU_IMG
+)
+
+pc.defineParameter(
     name="compute_node_id",
     description="ID of the compute node to pair with SDR",
     typ=portal.ParameterType.STRING,
