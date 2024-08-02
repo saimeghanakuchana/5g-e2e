@@ -1,0 +1,117 @@
+diff --git a/docker/open5gs/add_users.py b/docker/open5gs/add_users.py
+index cf0a4e19c..4612fab57 100644
+--- a/docker/open5gs/add_users.py
++++ b/docker/open5gs/add_users.py
+@@ -10,7 +10,7 @@ from misc.db.python.Open5GS import Open5GS
+ 
+ 
+ def add_user(imsi, key="00112233445566778899aabbccddeeff", op=None,
+-             opc="63bfa50ee6523365ff14c1f45f88737d", amf="9001", apn="srsapn", qci="9", ip_alloc=""):
++             opc="63bfa50ee6523365ff14c1f45f88737d", amf="9001", apn="internet", qci="9", ip_alloc=""):
+     '''Add UE data to Open5GS mongodb'''
+ 
+     if op is not None:
+@@ -19,6 +19,7 @@ def add_user(imsi, key="00112233445566778899aabbccddeeff", op=None,
+     slice_data = [
+         {
+             "sst": 1,
++            "sd": "000001",
+             "default_indicator": True,
+             "session": [
+                 {
+diff --git a/docker/open5gs/open5gs-5gc.yml b/docker/open5gs/open5gs-5gc.yml
+index c496ddd2c..7d174b97d 100644
+--- a/docker/open5gs/open5gs-5gc.yml
++++ b/docker/open5gs/open5gs-5gc.yml
+@@ -13,8 +13,8 @@ logger:
+ test:
+   serving:
+     - plmn_id:
+-        mcc: 001
+-        mnc: 01
++        mcc: 999
++        mnc: 99
+ 
+ global:
+   parameter:
+@@ -69,15 +69,15 @@ mme:
+         - address: 127.0.0.4
+   gummei:
+     - plmn_id:
+-        mcc: 001
+-        mnc: 01
++        mcc: 999
++        mnc: 99
+       mme_gid: 2
+       mme_code: 1
+   tai:
+     - plmn_id:
+-        mcc: 001
+-        mnc: 01
+-      tac: 7
++        mcc: 999
++        mnc: 99
++      tac: 1
+   security:
+     integrity_order: [EIA2, EIA1, EIA0]
+     ciphering_order: [EEA0, EEA1, EEA2]
+@@ -159,22 +159,23 @@ amf:
+       - address: ${OPEN5GS_IP}
+   guami:
+     - plmn_id:
+-        mcc: 001
+-        mnc: 01
++        mcc: 999
++        mnc: 99
+       amf_id:
+         region: 2
+         set: 1
+   tai:
+     - plmn_id:
+-        mcc: 001
+-        mnc: 01
+-      tac: 7
++        mcc: 999
++        mnc: 99
++      tac: 1
+   plmn_support:
+     - plmn_id:
+-        mcc: 001
+-        mnc: 01
++        mcc: 999
++        mnc: 99
+       s_nssai:
+         - sst: 1
++          sd: 0x000001
+   security:
+     integrity_order: [NIA2, NIA1, NIA0]
+     ciphering_order: [NEA0, NEA1, NEA2]
+@@ -298,6 +299,7 @@ nssf:
+         - uri: http://127.0.0.10:7777
+           s_nssai:
+             sst: 1
++            sd: 0x000001
+ bsf:
+   sbi:
+     server:
+diff --git a/docker/open5gs/open5gs.env b/docker/open5gs/open5gs.env
+index 2b43d4c5b..353eaab33 100644
+--- a/docker/open5gs/open5gs.env
++++ b/docker/open5gs/open5gs.env
+@@ -2,4 +2,4 @@ MONGODB_IP=127.0.0.1
+ OPEN5GS_IP=10.53.1.2
+ UE_IP_BASE=10.45.0
+ DEBUG=false
+-SUBSCRIBER_DB=001010123456780,00112233445566778899aabbccddeeff,opc,63bfa50ee6523365ff14c1f45f88737d,8000,9,10.45.1.2
++SUBSCRIBER_DB=subscriber_db.csv
+diff --git a/docker/open5gs/open5gs_entrypoint.sh b/docker/open5gs/open5gs_entrypoint.sh
+index 4328ebc38..a216131ee 100755
+--- a/docker/open5gs/open5gs_entrypoint.sh
++++ b/docker/open5gs/open5gs_entrypoint.sh
+@@ -49,3 +49,6 @@ then
+ else
+     exec stdbuf -o L $@
+ fi
++
++# start iperf3 server
++iperf3 -s -D

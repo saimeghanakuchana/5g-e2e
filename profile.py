@@ -6,9 +6,26 @@ import geni.rspec.emulab.pnext as PN
 
 tour_description = """
 Deploy a single network-based SDR.
+
+Option for deploying o5gs+srsRAN.
 """
 
 tour_instructions = """
+
+### Instructions
+
+```
+# SISO
+sudo /var/tmp/srsRAN_Project/build/apps/gnb/gnb \
+  -c /var/tmp/etc/srsran/gnb_rf_n310_tdd_n78_20mhz.yml
+
+# MIMO
+sudo /var/tmp/srsRAN_Project/build/apps/gnb/gnb \
+  -c /var/tmp/etc/srsran/gnb_rf_n310_tdd_n78_20mhz.yml \
+  -c /var/tmp/etc/srsran/mimo_usrp.yml
+
+```
+
 """
 
 UBUNTU_IMG = "urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU22-64-STD"
@@ -57,6 +74,13 @@ pc.defineParameter(
     defaultValue="192.168.40.1"
 )
 
+pc.defineParameter(
+    name="deploy_o5gsrsran_patched",
+    description="Deploy POWDER patched srsRAN and dockerized Open5GS components",
+    typ=portal.ParameterType.BOOLEAN,
+    defaultValue=False
+)
+
 params = pc.bindParameters()
 pc.verifyParameters()
 request = pc.makeRequestRSpec()
@@ -72,6 +96,8 @@ node.disk_image = params.compute_node_image
 node_sdr_if = node.addInterface("sdr-if")
 node_sdr_if.addAddress(pg.IPv4Address(params.sdr_host_address, "255.255.255.0"))
 node.addService(pg.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+if params.deploy_o5gsrsran_patched:
+    node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gsrsran-patched.sh"))
 node.startVNC()
 
 sdr = request.RawPC(params.sdr_node_id)
