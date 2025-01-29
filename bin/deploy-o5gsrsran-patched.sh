@@ -81,7 +81,7 @@ git checkout $RELEASE_24_04_HASH
 git apply $ETCDIR/srsran/srsran-cn.patch
 cp $ETCDIR/open5gs/subscriber_db.csv $SRCDIR/srsRAN_Project_2404/docker/open5gs/
 cd $SRCDIR/srsRAN_Project_2404/docker/open5gs
-sudo docker network create --subnet=10.53.1.0/16 open5gsnet
+sudo docker network create --subnet=10.53.0.0/16 open5gsnet
 sudo docker build --target open5gs -t open5gs-docker .
 sudo docker run --net open5gsnet --ip 10.53.1.2 --env-file open5gs.env --privileged --publish 9999:9999 -d open5gs-docker ./build/tests/app/5gc -c open5gs-5gc.yml
 echo configuring and starting open5gs container... done.
