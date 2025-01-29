@@ -36,6 +36,7 @@ pc = portal.Context()
 node_types = [
     ("d430", "Emulab, d430"),
     ("d740", "Emulab, d740"),
+    ("d760", "Emulab, d760"),
     ("d840", "Emulab, d840"),
 ]
 pc.defineParameter(
