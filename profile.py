@@ -5,109 +5,67 @@ import geni.rspec.emulab.pnext as PN
 
 
 tour_description = """
-Deploy a single network-based SDR.
+Deploy an e2e 5G network with Open5GS and srsRAN in flux office.
 
-Option for deploying o5gs+srsRAN.
 """
 
 tour_instructions = """
 
 ### Instructions
 
-```
-# SISO
-sudo /var/tmp/srsRAN_Project/build/apps/gnb/gnb \
-  -c /var/tmp/etc/srsran/gnb_rf_n310_tdd_n78_20mhz.yml
-
-# MIMO
-sudo /var/tmp/srsRAN_Project/build/apps/gnb/gnb \
-  -c /var/tmp/etc/srsran/gnb_rf_n310_tdd_n78_20mhz.yml \
-  -c /var/tmp/etc/srsran/mimo_usrp.yml
-
-```
-
 """
 
 UBUNTU_IMG = "urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU22-64-STD"
+COTS_UE_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:cots-jammy-image"
 COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 
 pc = portal.Context()
-
-node_types = [
-    ("d430", "Emulab, d430"),
-    ("d740", "Emulab, d740"),
-    ("d760", "Emulab, d760"),
-    ("d840", "Emulab, d840"),
-]
-pc.defineParameter(
-    name="compute_node_type",
-    description="Type of compute node to pair with X310 SDR",
-    typ=portal.ParameterType.STRING,
-    defaultValue=node_types[0],
-    legalValues=node_types
-)
-
-pc.defineParameter(
-    name="compute_node_image",
-    description="Disk image to load on the compute node",
-    typ=portal.ParameterType.STRING,
-    defaultValue=UBUNTU_IMG
-)
-
-pc.defineParameter(
-    name="compute_node_id",
-    description="ID of the compute node to pair with SDR",
-    typ=portal.ParameterType.STRING,
-    defaultValue=""
-)
-
-pc.defineParameter(
-    name="sdr_node_id",
-    description="ID of the SDR",
-    typ=portal.ParameterType.STRING,
-    defaultValue=""
-)
-
-pc.defineParameter(
-    name="sdr_host_address",
-    description="IP address to use on the SDR host",
-    typ=portal.ParameterType.STRING,
-    defaultValue="192.168.40.1"
-)
 
 pc.defineParameter(
     name="deploy_o5gsrsran_patched",
     description="Deploy POWDER patched srsRAN and dockerized Open5GS components",
     typ=portal.ParameterType.BOOLEAN,
-    defaultValue=False
+    defaultValue=True
+)
+
+pc.defineParameter(
+    name="include_orch",
+    description="Include orchestrator node",
+    typ=portal.ParameterType.BOOLEAN,
+    defaultValue=True
+)
+
+pc.defineParameter(
+    name="gnb_node_image",
+    description="Disk image to load on the gnb/core node (skull nuc)",
+    typ=portal.ParameterType.STRING,
+    defaultValue=UBUNTU_IMG
 )
 
 params = pc.bindParameters()
 pc.verifyParameters()
 request = pc.makeRequestRSpec()
 
-node = request.RawPC("host")
-node.component_manager_id = COMP_MANAGER_ID
+core_gnb_node = request.RawPC("core-gnb")
+core_gnb_node.component_manager_id = COMP_MANAGER_ID
 if params.compute_node_id:
-    node.component_id = params.compute_node_id
+    core_gnb_node.component_id = params.compute_node_id
 else:
-    node.hardware_type = params.compute_node_type
+    core_gnb_node.hardware_type = params.compute_node_type
 
-node.disk_image = params.compute_node_image
-node_sdr_if = node.addInterface("sdr-if")
-node_sdr_if.addAddress(pg.IPv4Address(params.sdr_host_address, "255.255.255.0"))
-node.addService(pg.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
+core_gnb_node.disk_image = params.skull_node_image
+core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 if params.deploy_o5gsrsran_patched:
-    node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gsrsran-patched.sh"))
-node.startVNC()
+    core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gsrsran-patched.sh"))
+core_gnb_node.startVNC()
 
-sdr = request.RawPC(params.sdr_node_id)
-sdr.component_id = params.sdr_node_id
-sdr.component_manager_id = COMP_MANAGER_ID
+ue_node = request.RawPC("ue")
+ue_node.component_manager_id = COMP_MANAGER_ID
+ue_node.component_id = "sm09"
 
-sdr_link = request.Link("sdr-link")
-sdr_link.addInterface(node_sdr_if)
-sdr_link.addNode(sdr)
+ue_node.disk_image = COTS_UE_IMG
+ue_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/setup_cots_ue.sh"))
+ue_node.startVNC()
 
 tour = ig.Tour()
 tour.Description(ig.Tour.MARKDOWN, tour_description)
