@@ -29,13 +29,6 @@ pc.defineParameter(
 )
 
 pc.defineParameter(
-    name="include_orch",
-    description="Include orchestrator node",
-    typ=portal.ParameterType.BOOLEAN,
-    defaultValue=True
-)
-
-pc.defineParameter(
     name="gnb_node_image",
     description="Disk image to load on the gnb/core node (skull nuc)",
     typ=portal.ParameterType.STRING,
@@ -48,12 +41,8 @@ request = pc.makeRequestRSpec()
 
 core_gnb_node = request.RawPC("core-gnb")
 core_gnb_node.component_manager_id = COMP_MANAGER_ID
-if params.compute_node_id:
-    core_gnb_node.component_id = params.compute_node_id
-else:
-    core_gnb_node.hardware_type = params.compute_node_type
-
 core_gnb_node.disk_image = params.skull_node_image
+core_gnb_node.compute_node_id = "skull2"
 core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 if params.deploy_o5gsrsran_patched:
     core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gsrsran-patched.sh"))
@@ -62,7 +51,6 @@ core_gnb_node.startVNC()
 ue_node = request.RawPC("ue")
 ue_node.component_manager_id = COMP_MANAGER_ID
 ue_node.component_id = "sm09"
-
 ue_node.disk_image = COTS_UE_IMG
 ue_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/setup_cots_ue.sh"))
 ue_node.startVNC()
