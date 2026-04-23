@@ -4,10 +4,11 @@ BINDIR=`dirname $0`
 SRCDIR=/var/tmp
 ETCDIR=/local/repository/etc
 SRS_PROJECT_REPO="https://github.com/srsRAN/srsRAN_Project"
-COMMIT_HASH="5e6f50a202c6efa671d5b231d7c911dc6c3d86ed"
-RELEASE_24_04_HASH="a15950301c5f3a1a166b79bb6c9ee901a4e8c2dd"
+OCUDU_REPO="https://gitlab.com/ocudu/ocudu.git"
+OCUDU_HASH="release_26_04"
+SRS_24_04_HASH="a15950301c5f3a1a166b79bb6c9ee901a4e8c2dd"
 
-if [ -f $SRCDIR/srs-o5gs-setup-complete ]; then
+if [ -f $SRCDIR/ocudu-o5gs-setup-complete ]; then
   echo "setup already ran; not running again"
   exit 0
 fi
@@ -60,11 +61,9 @@ sudo apt-get install -y \
   wireshark
 
 cd $SRCDIR
-git clone $SRS_PROJECT_REPO
-cp -r srsRAN_Project srsRAN_Project_2404
-cd srsRAN_Project
-git checkout $COMMIT_HASH
-git apply $ETCDIR/srsran/srsran-tdd.patch
+git clone $OCUDU_REPO
+cd ocudu
+git checkout $OCUDU_HASH
 mkdir build
 cd build
 cmake ../
@@ -76,8 +75,10 @@ cp -r $ETCDIR/srsran/* $SRCDIR/etc/srsran/
 echo configuring nodeb... done.
 
 echo configuring and starting open5gs container...
-cd $SRCDIR/srsRAN_Project_2404
-git checkout $RELEASE_24_04_HASH
+cd $SRCDIR
+git clone $SRS_PROJECT_REPO srsRAN_Project_2404
+cd srsRAN_Project_2404
+git checkout $SRS_24_04_HASH
 git apply $ETCDIR/srsran/srsran-cn.patch
 cp $ETCDIR/open5gs/subscriber_db.csv $SRCDIR/srsRAN_Project_2404/docker/open5gs/
 cd $SRCDIR/srsRAN_Project_2404/docker/open5gs
@@ -86,4 +87,4 @@ sudo docker build --target open5gs -t open5gs-docker .
 sudo docker run --net open5gsnet --ip 10.53.1.2 --env-file open5gs.env --privileged --publish 9999:9999 -d open5gs-docker ./build/tests/app/5gc -c open5gs-5gc.yml
 echo configuring and starting open5gs container... done.
 
-touch $SRCDIR/srs-o5gs-setup-complete
+touch $SRCDIR/ocudu-o5gs-setup-complete

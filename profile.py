@@ -44,7 +44,7 @@ core_gnb_node.component_manager_id = COMP_MANAGER_ID
 core_gnb_node.disk_image = params.gnb_node_image
 core_gnb_node.component_id = "skull2"
 if params.deploy_o5gsrsran_patched:
-    core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gsrsran-patched.sh"))
+    core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gs-ocudu.sh"))
 core_gnb_node.startVNC()
 
 ue_node = request.RawPC("ue")
