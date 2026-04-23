@@ -70,8 +70,8 @@ cmake ../
 make -j $(nproc)
 
 echo configuring nodeb...
-mkdir -p $SRCDIR/etc/srsran
-cp -r $ETCDIR/srsran/* $SRCDIR/etc/srsran/
+mkdir -p $SRCDIR/etc/ocudu
+cp -r $ETCDIR/ocudu/* $SRCDIR/etc/ocudu/
 echo configuring nodeb... done.
 
 echo configuring and starting open5gs container...
