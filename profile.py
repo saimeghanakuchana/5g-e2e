@@ -5,13 +5,20 @@ import geni.rspec.emulab.pnext as PN
 
 
 tour_description = """
-Deploy an e2e 5G network with Open5GS and srsRAN in flux office.
+Deploy an e2e 5G network with Open5GS and OCUDU in flux office.
 
 """
 
 tour_instructions = """
 
 ### Instructions
+
+On `skull2`:
+
+```
+sudo /var/tmp/ocudu/build/apps/gnb/gnb -c /var/tmp/etc/ocudu/gnb_rf_n310_tdd_n78_20mhz.yml
+```
+
 
 """
 
@@ -22,8 +29,8 @@ COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 pc = portal.Context()
 
 pc.defineParameter(
-    name="deploy_o5gsrsran_patched",
-    description="Deploy POWDER patched srsRAN and dockerized Open5GS components",
+    name="deploy_o5gs_ocudu",
+    description="Deploy OCUDU and dockerized Open5GS components",
     typ=portal.ParameterType.BOOLEAN,
     defaultValue=True
 )
@@ -43,7 +50,7 @@ core_gnb_node = request.RawPC("core-gnb")
 core_gnb_node.component_manager_id = COMP_MANAGER_ID
 core_gnb_node.disk_image = params.gnb_node_image
 core_gnb_node.component_id = "skull2"
-if params.deploy_o5gsrsran_patched:
+if params.deploy_o5gs_ocudu:
     core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gs-ocudu.sh"))
 core_gnb_node.startVNC()
 
