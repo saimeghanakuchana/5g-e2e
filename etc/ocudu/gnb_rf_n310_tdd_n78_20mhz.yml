@@ -32,6 +32,15 @@ log:
   filename: /tmp/gnb.log
   all_level: info
 
+metrics:
+  autostart_stdout_metrics: true
+  enable_log: true
+  layers:
+    enable_rlc: true
+    enable_sched: true
+  periodicity:
+    du_report_period: 1000
+
 pcap:
   mac_enable: false
   mac_filename: /tmp/gnb_mac.pcap

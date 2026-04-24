@@ -41,7 +41,6 @@ metrics:
   periodicity:
     du_report_period: 1000
   
-
 pcap:
   mac_enable: false
   mac_filename: /tmp/gnb_mac.pcap

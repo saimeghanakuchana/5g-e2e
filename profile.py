@@ -52,6 +52,8 @@ core_gnb_node.disk_image = params.gnb_node_image
 core_gnb_node.component_id = "skull2"
 if params.deploy_o5gs_ocudu:
     core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/deploy-o5gs-ocudu.sh"))
+    core_gnb_node.addService(pg.Execute(shell="bash", command="sudo ifconfig enp1s0f0 192.168.20.1"))
+    core_gnb_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
 core_gnb_node.startVNC()
 
 ue_node = request.RawPC("ue")
