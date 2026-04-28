@@ -64,7 +64,7 @@ ue_node.disk_image = COTS_UE_IMG
 ue_node.addService(pg.Execute(shell="bash", command="/local/repository/bin/setup_cots_ue.sh"))
 ue_node.startVNC()
 
-ue_node1 = request.RawPC("ue")
+ue_node1 = request.RawPC("ue1")
 ue_node1.component_manager_id = COMP_MANAGER_ID
 ue_node1.component_id = "sm10"
 ue_node1.disk_image = COTS_UE_IMG1
